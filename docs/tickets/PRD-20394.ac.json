@@ -117,7 +117,7 @@
   {
     "id": "TC-EXO-017",
     "ac": "AC14",
-    "text": "[需求缺失/INCOMPLETE] Design-review check (not a runtime test): neither exo_add_distribution_group_member, exo_get_auto_reply, nor exo_set_auto_reply accepts or forwards any tenant-selecting parameter; all three resolve their ExoClient exclusively through client_factory() (server.py:140-141), identical to the 7 existing tools. A true cross-tenant runtime test would require two real tenants' credentials, which this repo's test suite does not have.",
+    "text": "[INCOMPLETE] Design-review check (not a runtime test): neither exo_add_distribution_group_member, exo_get_auto_reply, nor exo_set_auto_reply accepts or forwards any tenant-selecting parameter; all three resolve their ExoClient exclusively through client_factory() (server.py:140-141), identical to the 7 existing tools. A true cross-tenant runtime test would require two real tenants' credentials, which this repo's test suite does not have.",
     "type": "manual",
     "steps": [
       "Open the diff for groups.py and mailbox.py",
