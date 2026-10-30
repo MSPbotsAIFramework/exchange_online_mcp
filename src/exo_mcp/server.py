@@ -143,11 +143,12 @@ def create_mcp_server(settings: Settings) -> FastMCP:
     def client_factory() -> ExoClient | None:
         return get_client_from_context(settings)
 
-    from .tools import devices, groups, mailbox, permissions
+    from .tools import devices, gdap_roles, groups, mailbox, permissions
 
     mailbox.register(mcp, client_factory)
     groups.register(mcp, client_factory)
     devices.register(mcp, client_factory)
     permissions.register(mcp, client_factory)
+    gdap_roles.register(mcp, client_factory)
 
     return mcp

@@ -33,6 +33,7 @@ EXPECTED_TOOLS = {
     "exo_remove_recipient_permission": {"identity", "trustee"},
     "exo_get_mailbox_permission": {"identity"},
     "exo_get_recipient_permission": {"identity"},
+    "exo_list_gdap_roles": set(),
 }
 
 _READ_ONLY = {
@@ -41,7 +42,12 @@ _READ_ONLY = {
     "exo_get_auto_reply",
     "exo_get_mailbox_permission",
     "exo_get_recipient_permission",
+    "exo_list_gdap_roles",
 }
+# exo_list_gdap_roles (PRD-21193) reads a packaged yaml file, not Exchange --
+# it has no credentials to be missing, so it is exempt from the
+# not-configured-without-credentials check below.
+_NO_CREDENTIALS_REQUIRED = {"exo_list_gdap_roles"}
 _DESTRUCTIVE = {
     "exo_convert_mailbox_to_shared",
     "exo_remove_distribution_group_member",
@@ -93,6 +99,8 @@ async def test_tools_without_credentials_return_not_configured():
     return the error envelope rather than raise."""
     mcp = create_mcp_server(Settings())
     for name, required in EXPECTED_TOOLS.items():
+        if name in _NO_CREDENTIALS_REQUIRED:
+            continue
         args = {
             key: (True if key == "hidden" else ["x"] if key == "aliases" else "x")
             for key in required

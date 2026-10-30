@@ -1,0 +1,101 @@
+# exchange_online_mcp GDAP role map.
+# One entry per tool this server registers (enforced by tests/test_gdap_role_map.py).
+# All 18 real Exchange tools map to Exchange Administrator (the ticket's own worked
+# example); see each entry's note for why.
+# PRD-21193.
+exo_get_mailbox:
+  roles: &id001
+  - Exchange Administrator
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_convert_mailbox_to_shared:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_set_mailbox_hidden:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_set_mailbox_forwarding:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_add_distribution_group_member:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_remove_distribution_group_member:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_get_auto_reply:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_set_auto_reply:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_list_mobile_devices:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_remove_mobile_device:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_add_mailbox_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_remove_mailbox_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_add_sendonbehalf_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_add_email_alias:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_add_recipient_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_remove_recipient_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_get_mailbox_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_get_recipient_permission:
+  roles: *id001
+  note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
+    Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
+    transport rules, and can grant SendOnBehalf).
+exo_list_gdap_roles:
+  roles: null
+  note: 'Meta tool: serves this file''s own contents (PRD-21193); not itself a client-tenant
+    action, so it carries no role of its own -- included here so the registered-tools/yaml/README
+    three-way consistency check (AC7) has no silent exception.'

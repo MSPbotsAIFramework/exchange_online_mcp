@@ -100,28 +100,40 @@ POST https://outlook.office365.com/adminapi/beta/{tenant}/InvokeCommand
 
 ## Tools
 
-| Tool | Semantics |
-|---|---|
-| `exo_get_mailbox(identity, include_statistics=True)` | read-only. Returns the mailbox, its statistics, and a `shared_conversion` block (`size_gb`, `over_limit`, `archive_enabled`, `litigation_hold_enabled`, `license_required`) answering "can this become a licence-free shared mailbox?" |
-| `exo_convert_mailbox_to_shared(identity)` | write, destructive. `Set-Mailbox -Type Shared`, then reads the mailbox back to confirm |
-| `exo_set_mailbox_hidden(identity, hidden)` | write, idempotent, reversible |
-| `exo_set_mailbox_forwarding(identity, forward_to=None, deliver_and_forward=True)` | write, idempotent, reversible. Forwards to a recipient **inside the tenant** only (`ForwardingAddress`); omit `forward_to` to switch forwarding off, which also clears any external `ForwardingSmtpAddress` set elsewhere. Reports `previous_forwarding` |
-| `exo_add_distribution_group_member(group, member, bypass_security_group_manager_check=False)` | write, idempotent. Repeating an add for an existing member reports `already_member` instead of failing. Rejects dynamic distribution groups, on-premises-synchronized groups and Microsoft 365 Groups with a distinct named error each — none of those can be managed through this tool |
-| `exo_remove_distribution_group_member(group, member, bypass_security_group_manager_check=False)` | write, destructive. One named member per call — no bulk removal |
-| `exo_get_auto_reply(identity)` | read-only. Returns the mailbox's automatic-reply state, audience, both message bodies, and the scheduled window. `start_time`/`end_time` are always UTC with a trailing `Z` |
-| `exo_set_auto_reply(identity, auto_reply_state=None, external_audience=None, internal_message=None, external_message=None, start_time=None, end_time=None)` | write, idempotent. Only supplied fields change — unsupplied fields keep their current value. `start_time`/`end_time` require a timezone offset and are converted to UTC before writing; reads the configuration back once after writing and returns the persisted result |
-| `exo_list_mobile_devices(mailbox, limit=50)` | read-only. `limit` 1–200, results truncated with `has_more` |
-| `exo_remove_mobile_device(device_id)` | write, destructive. Removes the mailbox partnership only — it does **not** wipe data on the handset |
-| `exo_add_mailbox_permission(identity, user, auto_mapping=True)` | write. Grants the trustee FullAccess (fixed, not caller-settable). Errors if already granted — check with `exo_get_mailbox_permission` first |
-| `exo_remove_mailbox_permission(identity, user)` | write, destructive. Revokes the trustee's FullAccess (fixed). Errors if not currently granted |
-| `exo_add_recipient_permission(identity, trustee)` | write. Grants the trustee SendAs (fixed, not caller-settable). Errors if already granted — check with `exo_get_recipient_permission` first |
-| `exo_remove_recipient_permission(identity, trustee)` | write, destructive. Revokes the trustee's SendAs (fixed). Errors if not currently granted |
-| `exo_get_mailbox_permission(identity, user=None)` | read-only. Lists trustees holding FullAccess, or narrows to one trustee if `user` is given. Only `FullAccess` grants are reported; the mailbox owner's own implicit self-grant is excluded when listing everyone. Empty list, not an error, when none match |
-| `exo_get_recipient_permission(identity, trustee=None)` | read-only. Lists trustees holding SendAs, or narrows to one trustee if `trustee` is given. Only `SendAs` grants are reported; the mailbox owner's own implicit self-grant is excluded when listing everyone. Empty list, not an error, when none match |
+| Tool | Semantics | GDAP Role |
+|---|---|---|
+| `exo_get_mailbox(identity, include_statistics=True)` | read-only. Returns the mailbox, its statistics, and a `shared_conversion` block (`size_gb`, `over_limit`, `archive_enabled`, `litigation_hold_enabled`, `license_required`) answering "can this become a licence-free shared mailbox?" | Exchange Administrator |
+| `exo_convert_mailbox_to_shared(identity)` | write, destructive. `Set-Mailbox -Type Shared`, then reads the mailbox back to confirm | Exchange Administrator |
+| `exo_set_mailbox_hidden(identity, hidden)` | write, idempotent, reversible | Exchange Administrator |
+| `exo_set_mailbox_forwarding(identity, forward_to=None, deliver_and_forward=True)` | write, idempotent, reversible. Forwards to a recipient **inside the tenant** only (`ForwardingAddress`); omit `forward_to` to switch forwarding off, which also clears any external `ForwardingSmtpAddress` set elsewhere. Reports `previous_forwarding` | Exchange Administrator |
+| `exo_add_email_alias(identity, aliases)` | write, idempotent. Additive (read-merge-write): adds one or more proxy addresses, reporting `already_present`/`in_use_by_other` per address rather than failing the whole call; a plain address or explicit lowercase `smtp:` prefix only -- `SMTP:` (new primary) is rejected | Exchange Administrator |
+| `exo_add_distribution_group_member(group, member, bypass_security_group_manager_check=False)` | write, idempotent. Repeating an add for an existing member reports `already_member` instead of failing. Rejects dynamic distribution groups, on-premises-synchronized groups and Microsoft 365 Groups with a distinct named error each — none of those can be managed through this tool | Exchange Administrator |
+| `exo_remove_distribution_group_member(group, member, bypass_security_group_manager_check=False)` | write, destructive. One named member per call — no bulk removal | Exchange Administrator |
+| `exo_get_auto_reply(identity)` | read-only. Returns the mailbox's automatic-reply state, audience, both message bodies, and the scheduled window. `start_time`/`end_time` are always UTC with a trailing `Z` | Exchange Administrator |
+| `exo_set_auto_reply(identity, auto_reply_state=None, external_audience=None, internal_message=None, external_message=None, start_time=None, end_time=None)` | write, idempotent. Only supplied fields change — unsupplied fields keep their current value. `start_time`/`end_time` require a timezone offset and are converted to UTC before writing; reads the configuration back once after writing and returns the persisted result | Exchange Administrator |
+| `exo_list_mobile_devices(mailbox, limit=50)` | read-only. `limit` 1–200, results truncated with `has_more` | Exchange Administrator |
+| `exo_remove_mobile_device(device_id)` | write, destructive. Removes the mailbox partnership only — it does **not** wipe data on the handset | Exchange Administrator |
+| `exo_add_mailbox_permission(identity, user, auto_mapping=True)` | write. Grants the trustee FullAccess (fixed, not caller-settable). Errors if already granted — check with `exo_get_mailbox_permission` first | Exchange Administrator |
+| `exo_remove_mailbox_permission(identity, user)` | write, destructive. Revokes the trustee's FullAccess (fixed). Errors if not currently granted | Exchange Administrator |
+| `exo_add_sendonbehalf_permission(identity, delegate)` | write, idempotent. Grants SendOnBehalf -- a distinct right from `exo_add_mailbox_permission`'s FullAccess; delegate must already be a recipient in the tenant; reports `already_present` | Exchange Administrator |
+| `exo_add_recipient_permission(identity, trustee)` | write. Grants the trustee SendAs (fixed, not caller-settable). Errors if already granted — check with `exo_get_recipient_permission` first | Exchange Administrator |
+| `exo_remove_recipient_permission(identity, trustee)` | write, destructive. Revokes the trustee's SendAs (fixed). Errors if not currently granted | Exchange Administrator |
+| `exo_get_mailbox_permission(identity, user=None)` | read-only. Lists trustees holding FullAccess, or narrows to one trustee if `user` is given. Only `FullAccess` grants are reported; the mailbox owner's own implicit self-grant is excluded when listing everyone. Empty list, not an error, when none match | Exchange Administrator |
+| `exo_get_recipient_permission(identity, trustee=None)` | read-only. Lists trustees holding SendAs, or narrows to one trustee if `trustee` is given. Only `SendAs` grants are reported; the mailbox owner's own implicit self-grant is excluded when listing everyone. Empty list, not an error, when none match | Exchange Administrator |
+| `exo_list_gdap_roles()` | read-only, no parameters, no tenant context. Serves `docs/gdap-role-map.yaml` as structured JSON for the Agent Platform to read instead of parsing this table (PRD-21193); byte-identical on every call | unknown |
 
 Cmdlet output is projected onto a field whitelist and the `@odata.type` companion keys
 are stripped, so a typical response is under 1.5 KB instead of the ~40 KB a raw
 `Get-Mailbox` returns.
+
+### GDAP role map
+
+The **GDAP Role** column above is the Entra directory role that lets a human admin
+perform the same action by hand (every real tool here needs Exchange Administrator, per
+the ticket's own worked example); `unknown` marks `exo_list_gdap_roles` itself, which is
+not a client-tenant action. See `docs/gdap-role-map.yaml` for the machine-readable source
+of truth and each tool's reasoning `note`. A test (`tests/test_gdap_role_map.py`) fails if
+a registered tool, this table, and the yaml file ever disagree.
 
 ## Credentials (HTTP headers)
 
