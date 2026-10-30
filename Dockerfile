@@ -38,6 +38,9 @@ WORKDIR /app
 
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --from=builder --chown=app:app /app/src /app/src
+# docs/gdap-role-map.yaml is read at runtime by exo_list_gdap_roles (PRD-21193);
+# only this one file ships, not the rest of docs/ (tickets/modules history).
+COPY --from=builder --chown=app:app /app/docs/gdap-role-map.yaml /app/docs/gdap-role-map.yaml
 
 ENV PATH="/app/.venv/bin:$PATH"
 
