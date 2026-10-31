@@ -1,8 +1,9 @@
 # exchange_online_mcp GDAP role map.
 # One entry per tool this server registers (enforced by tests/test_gdap_role_map.py).
-# All 18 real Exchange tools map to Exchange Administrator (the ticket's own worked
-# example); see each entry's note for why.
-# PRD-21193.
+# 18 of the 19 real Exchange tools map to Exchange Administrator (the ticket's own
+# worked example); exo_add_tenant_block_list_entry (PRD-21619) is the one exception --
+# see each entry's note for why.
+# PRD-21193, PRD-21619.
 exo_get_mailbox:
   roles: &id001
   - Exchange Administrator
@@ -94,6 +95,14 @@ exo_get_recipient_permission:
   note: Matches the ticket's own worked example (exo_add_mailbox_permission -> Exchange
     Administrator) and Microsoft's GDAP guidance (Exchange administrator manages mailboxes,
     transport rules, and can grant SendOnBehalf).
+exo_add_tenant_block_list_entry:
+  roles:
+    - Security Administrator
+    - Organization Management
+  note: 'New-/Get-TenantAllowBlockListItems require the Security Administrator (or
+    Organization Management) role group, not Exchange Administrator -- confirmed
+    against Microsoft''s Tenant Allow/Block List configuration guide. The first
+    tool in this connector that is not an Exchange Administrator action.'
 exo_list_gdap_roles:
   roles: null
   note: 'Meta tool: serves this file''s own contents (PRD-21193); not itself a client-tenant
