@@ -1,0 +1,163 @@
+[
+  {
+    "id": "TC-EXO-019",
+    "ac": "AC1",
+    "text": "Given list_type=Sender, entries=[\"attacker@contoso.com\"], no_expiration=true, and no existing block entry for that sender, When exo_add_tenant_block_list_entry is called, Then the response reports result=added for that entry with its identity, value, list_type=Sender and expiration_date=null",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_add_new_sender_entry_succeeds"
+    ]
+  },
+  {
+    "id": "TC-EXO-020",
+    "ac": "AC2",
+    "text": "Given a sender already present in the tenant block list, When exo_add_tenant_block_list_entry is called again for the same list_type and value, Then the response reports result=already_blocked for that entry and no New-TenantAllowBlockListItems call is issued for it",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_add_existing_entry_is_idempotent"
+    ]
+  },
+  {
+    "id": "TC-EXO-021",
+    "ac": "AC3",
+    "text": "Given two entries in one call, one new and one already blocked, When exo_add_tenant_block_list_entry is called, Then the response reports the new one as added and the existing one as already_blocked in the same results list, and the write call carries only the new entry",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_mixed_new_and_existing_entries_reported_independently"
+    ]
+  },
+  {
+    "id": "TC-EXO-022",
+    "ac": "AC4",
+    "text": "Given entries=[], When exo_add_tenant_block_list_entry is called, Then the response is error.code=invalid_argument and no upstream call (neither Get- nor New-TenantAllowBlockListItems) is made",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_empty_entries_rejected_without_upstream_call"
+    ]
+  },
+  {
+    "id": "TC-EXO-023",
+    "ac": "AC5",
+    "text": "Given list_type=\"IP\" (not one of the three supported values), When exo_add_tenant_block_list_entry is called, Then the response is error.code=invalid_argument whose message names Sender, Url and FileHash as the supported values",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_unsupported_list_type_rejected"
+    ]
+  },
+  {
+    "id": "TC-EXO-024",
+    "ac": "AC6",
+    "text": "Given no_expiration=true and expiration_date=\"2026-12-01T00:00:00+00:00\" both supplied, When exo_add_tenant_block_list_entry is called, Then the response is error.code=invalid_argument stating the two are mutually exclusive and no upstream call is made",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_no_expiration_and_expiration_date_are_mutually_exclusive"
+    ]
+  },
+  {
+    "id": "TC-EXO-025",
+    "ac": "AC7",
+    "text": "Given expiration_date=\"2026-12-01T00:00:00\" (no timezone offset), When exo_add_tenant_block_list_entry is called, Then the response is error.code=invalid_argument and no upstream call is made",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_expiration_date_without_offset_rejected"
+    ]
+  },
+  {
+    "id": "TC-EXO-026",
+    "ac": "AC8",
+    "text": "Given neither no_expiration nor expiration_date is supplied, When exo_add_tenant_block_list_entry is called, Then neither NoExpiration nor ExpirationDate is present in the New-TenantAllowBlockListItems call parameters, and the response surfaces whatever ExpirationDate the mocked upstream assigns rather than a client-invented default",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_no_expiration_option_supplied_lets_upstream_default_apply"
+    ]
+  },
+  {
+    "id": "TC-EXO-027",
+    "ac": "AC9",
+    "text": "Given no Exchange Online credential headers on the request, When exo_add_tenant_block_list_entry is called, Then the response is error.code=not_configured (the same NO_CREDENTIALS envelope every other tool in this connector returns)",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_missing_credentials_returns_not_configured"
+    ]
+  },
+  {
+    "id": "TC-EXO-028",
+    "ac": "AC10",
+    "text": "Given the mocked upstream answers New-TenantAllowBlockListItems with HTTP 403, When exo_add_tenant_block_list_entry is called, Then the response is error.code=unauthorized whose message explicitly names Security Administrator or Organization Management",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_forbidden_response_names_required_role"
+    ]
+  },
+  {
+    "id": "TC-EXO-029",
+    "ac": "AC10",
+    "type": "manual",
+    "text": "Given a real tenant where the app-only credential has Exchange Administrator but not Security Administrator / Organization Management, When exo_add_tenant_block_list_entry is called against that tenant, Then Exchange's real 403 response body is captured and compared against this tool's unauthorized message for wording accuracy",
+    "precond": "A real EXO tenant with an app registration that has Exchange.ManageAsApp consent and only the Exchange Administrator role assigned (not Security Administrator / Organization Management).",
+    "steps": [
+      "Call exo_add_tenant_block_list_entry(list_type=\"Sender\", entries=[\"test@example.com\"], no_expiration=true) against the real tenant.",
+      "Record the raw HTTP status and response body Exchange returns.",
+      "Compare against the tool's error.code=unauthorized message produced from that real response."
+    ],
+    "expect": "The tool's unauthorized message correctly reflects the real 403 Exchange returns for a Security-Administrator-only cmdlet called by an Exchange-Administrator-only credential; no misclassification as a different error code.",
+    "priority": "medium",
+    "result": "untested",
+    "notes": "Needs a real vendor account with a specific, narrower role grant than this connector's documented default (Exchange Administrator) -- not available in the design/dev flow. Per references/mcp-track.md §3, a missing test account does not block shipping; this case is tracked here for a real-tenant retest."
+  },
+  {
+    "id": "TC-EXO-030",
+    "ac": "AC11",
+    "text": "Given notes=\"requested by SOC\" on a newly added entry, When exo_add_tenant_block_list_entry is called, Then Notes is forwarded to New-TenantAllowBlockListItems and the mocked upstream's echoed Notes value appears in that entry's result",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_notes_forwarded_and_echoed"
+    ]
+  },
+  {
+    "id": "TC-EXO-031",
+    "ac": "AC12",
+    "text": "The connector's three-way GDAP role consistency check (registered tools vs docs/gdap-role-map.yaml vs README's Tools table) passes with exo_add_tenant_block_list_entry present, mapped to Security Administrator / Organization Management in both the yaml and the README, distinct from the other 18 tools' Exchange Administrator",
+    "type": "auto",
+    "tests": [
+      "tests/test_gdap_role_map.py::test_gdap_role_map_matches_registered_tools_and_readme",
+      "tests/test_gdap_role_map.py::test_real_tools_map_to_their_documented_role"
+    ]
+  },
+  {
+    "id": "TC-EXO-032",
+    "ac": "AC1",
+    "text": "Given list_type=\"Url\", entries=[\"http://evil.example/\"], no_expiration=true, When exo_add_tenant_block_list_entry is called, Then the entry is added the same way a Sender entry is (result=added, list_type=Url echoed back)",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_url_list_type_accepted"
+    ]
+  },
+  {
+    "id": "TC-EXO-033",
+    "ac": "AC1",
+    "text": "Given list_type=\"FileHash\", entries=[\"768a813668695ef2483b2bde7cf5d1b2db0423a0d3e63e498f3ab6f2eb13ea3\"], no_expiration=true, When exo_add_tenant_block_list_entry is called, Then the entry is added the same way a Sender entry is (result=added, list_type=FileHash echoed back)",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_filehash_list_type_accepted"
+    ]
+  },
+  {
+    "id": "TC-EXO-034",
+    "ac": "AC2",
+    "text": "Given the tenant block list already has \"Attacker@Contoso.com\" (mixed case) and the caller requests entries=[\"attacker@contoso.com\"] (lowercase), When exo_add_tenant_block_list_entry is called, Then the entry is reported already_blocked (case-insensitive match), not added again",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_dedup_match_is_case_insensitive"
+    ]
+  },
+  {
+    "id": "TC-EXO-035",
+    "ac": "AC13",
+    "text": "Given two entries in one call where the mocked upstream's New-TenantAllowBlockListItems response reports a per-entry Error for one of them, When exo_add_tenant_block_list_entry is called, Then the failing entry is reported result=invalid with that message, and the other entry in the same call is still reported added",
+    "type": "auto",
+    "tests": [
+      "tests/test_tenant_block_list.py::test_one_malformed_entry_does_not_fail_the_others"
+    ]
+  }
+]
