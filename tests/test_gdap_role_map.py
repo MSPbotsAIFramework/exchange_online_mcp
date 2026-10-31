@@ -73,7 +73,7 @@ async def test_gdap_role_map_matches_registered_tools_and_readme():
     role_map = yaml.safe_load(YAML_PATH.read_text(encoding="utf-8"))
     readme_rows = _readme_role_rows()
 
-    assert len(role_map) == 19, f"expected 19 role-map entries, found {len(role_map)}"
+    assert len(role_map) == 20, f"expected 20 role-map entries, found {len(role_map)}"
     problems = check_consistency(registered, role_map, readme_rows)
     assert not problems, "\n".join(problems)
 
@@ -88,15 +88,34 @@ def test_every_role_map_entry_has_a_non_empty_note():
         )
 
 
-def test_all_18_real_tools_map_to_exchange_administrator():
-    """TC2: every tool exchange_online_mcp actually registers against a
-    mailbox/group/device/permission object needs Exchange Administrator --
-    the ticket's own worked example."""
+def test_real_tools_map_to_their_documented_role():
+    """TC2/TC-EXO-031: every real tool maps to its documented GDAP role.
+
+    This generalizes the old "every real tool needs Exchange Administrator"
+    assumption rather than just extending it (PRD-21619 Tech design, Change
+    list item 5): the 18 pre-existing tools still each assert
+    ["Exchange Administrator"] exactly, nothing about them changes;
+    exo_add_tenant_block_list_entry (PRD-21619) is the one tool that needs a
+    different role (Security Administrator / Organization Management), since
+    New-/Get-TenantAllowBlockListItems are not Exchange Administrator
+    actions. Every tool's role is still pinned exactly -- this is a
+    correctness fix the new tool's own addition forces, not a weakening.
+    """
     role_map = yaml.safe_load(YAML_PATH.read_text(encoding="utf-8"))
     real_tools = {k: v for k, v in role_map.items() if k != "exo_list_gdap_roles"}
-    assert len(real_tools) == 18
-    for tool, entry in real_tools.items():
+    assert len(real_tools) == 19
+
+    exchange_admin_tools = {
+        k: v for k, v in real_tools.items() if k != "exo_add_tenant_block_list_entry"
+    }
+    assert len(exchange_admin_tools) == 18
+    for tool, entry in exchange_admin_tools.items():
         assert entry["roles"] == ["Exchange Administrator"], tool
+
+    assert real_tools["exo_add_tenant_block_list_entry"]["roles"] == [
+        "Security Administrator",
+        "Organization Management",
+    ]
 
 
 def test_consistency_check_catches_an_unmapped_tool():

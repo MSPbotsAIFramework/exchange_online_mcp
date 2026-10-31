@@ -33,6 +33,7 @@ EXPECTED_TOOLS = {
     "exo_remove_recipient_permission": {"identity", "trustee"},
     "exo_get_mailbox_permission": {"identity"},
     "exo_get_recipient_permission": {"identity"},
+    "exo_add_tenant_block_list_entry": {"list_type", "entries"},
     "exo_list_gdap_roles": set(),
 }
 
@@ -102,7 +103,15 @@ async def test_tools_without_credentials_return_not_configured():
         if name in _NO_CREDENTIALS_REQUIRED:
             continue
         args = {
-            key: (True if key == "hidden" else ["x"] if key == "aliases" else "x")
+            key: (
+                True
+                if key == "hidden"
+                else ["x"]
+                if key in ("aliases", "entries")
+                else "Sender"
+                if key == "list_type"
+                else "x"
+            )
             for key in required
         }
         result = await mcp.call_tool(name, args)

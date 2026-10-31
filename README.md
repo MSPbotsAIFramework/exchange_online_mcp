@@ -120,6 +120,7 @@ POST https://outlook.office365.com/adminapi/beta/{tenant}/InvokeCommand
 | `exo_remove_recipient_permission(identity, trustee)` | write, destructive. Revokes the trustee's SendAs (fixed). Errors if not currently granted | Exchange Administrator |
 | `exo_get_mailbox_permission(identity, user=None)` | read-only. Lists trustees holding FullAccess, or narrows to one trustee if `user` is given. Only `FullAccess` grants are reported; the mailbox owner's own implicit self-grant is excluded when listing everyone. Empty list, not an error, when none match | Exchange Administrator |
 | `exo_get_recipient_permission(identity, trustee=None)` | read-only. Lists trustees holding SendAs, or narrows to one trustee if `trustee` is given. Only `SendAs` grants are reported; the mailbox owner's own implicit self-grant is excluded when listing everyone. Empty list, not an error, when none match | Exchange Administrator |
+| `exo_add_tenant_block_list_entry(list_type, entries, no_expiration=False, expiration_date=None, notes=None)` | write, idempotent, reversible. Adds one or more Block entries (Sender/Url/FileHash) to the tenant-wide Allow/Block List; entries already blocked are reported `already_blocked` rather than erroring; a malformed entry in a multi-entry call is reported `invalid` without failing the others | Security Administrator<br>Organization Management |
 | `exo_list_gdap_roles()` | read-only, no parameters, no tenant context. Serves `docs/gdap-role-map.yaml` as structured JSON for the Agent Platform to read instead of parsing this table (PRD-21193); byte-identical on every call | unknown |
 
 Cmdlet output is projected onto a field whitelist and the `@odata.type` companion keys
@@ -129,11 +130,14 @@ are stripped, so a typical response is under 1.5 KB instead of the ~40 KB a raw
 ### GDAP role map
 
 The **GDAP Role** column above is the Entra directory role that lets a human admin
-perform the same action by hand (every real tool here needs Exchange Administrator, per
-the ticket's own worked example); `unknown` marks `exo_list_gdap_roles` itself, which is
-not a client-tenant action. See `docs/gdap-role-map.yaml` for the machine-readable source
-of truth and each tool's reasoning `note`. A test (`tests/test_gdap_role_map.py`) fails if
-a registered tool, this table, and the yaml file ever disagree.
+perform the same action by hand. 18 of this connector's 19 real tools need Exchange
+Administrator, per the ticket's own worked example; `exo_add_tenant_block_list_entry`
+(PRD-21619) is the one exception, needing Security Administrator (or Organization
+Management) instead -- see its row in `docs/gdap-role-map.yaml` for why. `unknown` marks
+`exo_list_gdap_roles` itself, which is not a client-tenant action. See
+`docs/gdap-role-map.yaml` for the machine-readable source of truth and each tool's
+reasoning `note`. A test (`tests/test_gdap_role_map.py`) fails if a registered tool, this
+table, and the yaml file ever disagree.
 
 ## Credentials (HTTP headers)
 
